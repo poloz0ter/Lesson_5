@@ -17,6 +17,7 @@ class Interface
   def create_station
     puts "Введите название станции: "
     name = gets.chomp
+    return puts "Имя станции не может быть пустым" if name.empty?
     station = Station.new(name)
     @stations << station
     puts "Станция #{station.name} создана!"
@@ -85,6 +86,13 @@ class Interface
     puts "Поезд №#{@trains[train_choice].number} выставлен на маршрут!"
   end
 
+  def edit_wagons
+    puts "1.Добавить вагон 2.Удалить вагон"
+    input = gets.to_i
+    add_wagon_to_train if input == 1
+    delete_wagon_from_train if input == 2
+  end
+
   def add_wagon_to_train
     puts "Введите тип вагона(пассажирский или грузовой)"
     type = gets.chomp.downcase
@@ -111,31 +119,38 @@ class Interface
     puts "Вагон отцеплен."
   end
 
-  def train_forward
+  def change_directory
     @trains.each_with_index { |train, index| puts "#{index + 1}.#{train.number}" }
     puts "Выберите поезд:"
-    input = gets.to_i - 1
-    @trains[input].go_forward
-    puts "Поезд находится на станции #{@trains[input].current_station.name}"
+    @our_train_indx = gets.to_i - 1
+    puts "Поезд находится на станции #{@trains[@our_train_indx].current_station.name}"
+    print "Маршрут поезда: "
+    @trains[@our_train_indx].route.stations.each { |st| print " #{st.name}  " }
+    puts "\nКуда двигаться? 1.Вперед  2.Назад"
+    input = gets.to_i
+    train_forward if input == 1
+    train_backward if input == 2
+    puts "Поезд теперь находится на станции #{@trains[@our_train_indx].current_station.name}"
+
+  end
+
+  def train_forward
+    @trains[@our_train_indx].go_forward
   end
 
   def train_backward
-    @trains.each_with_index { |train, index| puts "#{index + 1}.#{train.number}" }
-    puts "Выберите поезд:"
-    input = gets.to_i - 1
-    @trains[input].go_backward
-    puts "Поезд находится на станции #{@trains[input].current_station.name}"
+    @trains[@our_train_indx].go_backward
   end
 
   def show_stations
-    @stations.each { |station| puts station}
+    @stations.each { |station| puts station.name}
   end
 
   def show_trains_on_station
     puts "Выберите станцию: "
     @stations.each_with_index { |station, index| puts "#{index + 1}.#{station.name}" }
     input = gets.to_i - 1
-    @stations[input].trains.each { |train| puts "#{train.number}"}
+    @stations[input].trains.each { |train| puts "#{train.number}" }
   end
 
   def run
@@ -165,24 +180,9 @@ class Interface
       when 6
         then add_route_to_train
       when 7
-        puts "1.Добавить  2.Отсоединить"
-        input = gets.to_i
-        case input
-          when 1
-            then add_wagon_to_train
-          when 2
-            then delete_wagon_from_train
-          end
+        then edit_wagons
       when 8
-        then 
-        puts "1.Вперед  2.Назад"
-        go = gets.to_i
-        case go
-          when 1
-            then train_forward
-          when 2
-            then train_backward
-        end
+        then change_directory
       when 9
         then show_stations
       when 10

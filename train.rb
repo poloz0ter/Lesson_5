@@ -6,7 +6,7 @@ class Train
     @type = :unknown
   end
 
-  attr_reader :speed, :number, :type, :wagons, :current_station
+  attr_reader :speed, :number, :type, :wagons, :current_station, :route
 
   def speed_up
     @speed += 20
@@ -55,12 +55,10 @@ class Train
   private
 
   def next_station
-    return puts "Это последняя станция" if current_station == @route.stations.last
     @route.stations[@station_index + 1]
   end
 
   def previous_station
-    return puts "Это первая станция" if current_station == @route.stations.first
     @route.stations[@station_index - 1]
   end
 end
